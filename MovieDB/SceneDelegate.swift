@@ -49,13 +49,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
     
     private func setupInitialViewController(_ windowScene: UIWindowScene) {
-        let photoListViewController = MovieListViewController(nibName: "MovieListViewController", bundle: nil)
+        let movieListViewController = MovieListViewController(nibName: "MovieListViewController", bundle: nil)
         
-        let navigationController = UINavigationController(rootViewController: photoListViewController)
+        let navigationController = UINavigationController(rootViewController: movieListViewController)
         
-        window = UIWindow(windowScene: windowScene)
-        window?.rootViewController = navigationController
-        window?.makeKeyAndVisible()
+        let uiWindow = UIWindow(windowScene: windowScene)
+        uiWindow.rootViewController = navigationController
+        uiWindow.makeKeyAndVisible()
+        window = uiWindow
     }
 
 }

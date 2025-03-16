@@ -14,12 +14,27 @@ class MovieListViewModel {
     private let disposeBag = DisposeBag()
     
     let movies = BehaviorRelay<[Movie]>(value: [])
+    private var currentPage = 1
+    private var isLoading = false
     
     func fetchMovies() {
-        movieService.fetchPopularMovies()
+        guard !isLoading else { return }
+        isLoading = true
+        
+        movieService.fetchPopularMovies(page: currentPage)
             .observe(on: MainScheduler.instance)
-            .subscribe(onNext: { [weak self] movies in
-                self?.movies.accept(movies)
+            .subscribe(onNext: { [weak self] newMovies in
+                guard let self = self else { return }
+                
+                var updatedMovies = self.movies.value
+                updatedMovies.append(contentsOf: newMovies)
+                self.movies.accept(updatedMovies)
+                
+                self.currentPage += 1
+                self.isLoading = false
+            }, onError: { [weak self] error in
+                print("Error fetching movies: \(error)")
+                self?.isLoading = false
             })
             .disposed(by: disposeBag)
     }

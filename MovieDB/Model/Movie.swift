@@ -14,12 +14,12 @@ struct MovieResponse: Codable {
 struct Movie: Codable {
     let id: Int
     let title: String
-    let posterPath: String
+    let posterPath: String?
     let releaseDate: String
     let overview: String
     
     var image: String {
-        return "https://image.tmdb.org/t/p/w500\(posterPath)"
+        return "https://image.tmdb.org/t/p/w500\(posterPath ?? "")"
     }
     
     enum CodingKeys: String, CodingKey {

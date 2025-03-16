@@ -66,13 +66,47 @@ class MovieListViewController: UIViewController {
         
         movieCollectionView.setCollectionViewLayout(layout, animated: true)
         movieCollectionView.register(UINib(nibName: "MovieCell", bundle: nil), forCellWithReuseIdentifier: MovieCell.identifier)
+        movieCollectionView.register(LoadingCell.self, forCellWithReuseIdentifier: LoadingCell.identifier)
     }
     
     private func bindViewModel() {
-        viewModel.movies
-            .bind(to: movieCollectionView.rx.items(cellIdentifier: MovieCell.identifier, cellType: MovieCell.self)) { index, movie, cell in
-                cell.configure(with: movie)
+        Observable.combineLatest(
+            viewModel.movies,
+            Observable.just(true)
+        ) { (movies, showLoading) -> [Any] in
+            var items: [Any] = movies
+            if showLoading {
+                items.append("LoadingCell" as Any)
             }
+            return items
+        }
+        .bind(to: movieCollectionView.rx.items) { collectionView, index, item in
+            if let _ = item as? String, item as? String == "LoadingCell" {
+                let loadingCell = collectionView.dequeueReusableCell(withReuseIdentifier: LoadingCell.identifier, for: IndexPath(item: index, section: 0))
+                return loadingCell
+            }
+            
+            else if let movie = item as? Movie {
+                let indexPath = IndexPath(item: index, section: 0)
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MovieCell.identifier, for: indexPath) as! MovieCell
+                cell.configure(with: movie)
+                return cell
+            }
+            
+            return UICollectionViewCell()
+        }
+        .disposed(by: disposeBag)
+        
+        
+        movieCollectionView.rx.willDisplayCell
+            .subscribe(onNext: { [weak self] cell, indexPath in
+                guard let self = self else { return }
+                
+                let totalMovies = self.viewModel.movies.value.count
+                if indexPath.item == totalMovies - 2 {
+                    self.viewModel.fetchMovies()
+                }
+            })
             .disposed(by: disposeBag)
     }
     

@@ -21,6 +21,6 @@ class MovieCell: UICollectionViewCell {
     }
     
     func configure(with item: Movie) {
-        movieImage.sd_setImage(with: URL(string: item.image), placeholderImage: UIImage.moviePlaceholder)
+        movieImage.sd_setImage(with: URL(string: item.image), placeholderImage: UIImage.moviePlaceholderImage)
     }
 }
